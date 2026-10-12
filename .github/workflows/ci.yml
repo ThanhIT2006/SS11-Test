@@ -1,0 +1,39 @@
+name: Java Spring CI Pipeline
+
+on:
+  push:
+    branches: [ "main", "master" ]
+  pull_request:
+    branches: [ "main", "master" ]
+
+jobs:
+  build-and-test:
+    runs-on: ubuntu-latest
+
+    steps:
+      # 1. Checkout mã nguồn từ repository
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      # 2. Cài đặt môi trường Java (JDK 17)
+      - name: Set up JDK 17
+        uses: actions/setup-java@v4
+        with:
+          java-version: '17'
+          distribution: 'temurin'
+          cache: 'gradle'
+
+      # 3. Cấp quyền thực thi cho gradlew (Tránh lỗi Permission denied trên Linux runner)
+      - name: Grant execute permission for gradlew
+        run: chmod +x gradlew
+
+      # 4. Kiểm tra cú pháp, Build, Test và Package ứng dụng
+      - name: Build and Package with Gradle
+        run: ./gradlew build
+
+      # 5. Lưu tệp JAR sau khi package thành artifact (tùy chọn)
+      - name: Upload Build Artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: spring-boot-app
+          path: build/libs/*.jar
